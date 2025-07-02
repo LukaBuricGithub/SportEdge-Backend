@@ -1,0 +1,6 @@
+@SportEdge.API_HostAddress = http://localhost:5169
+
+GET {{SportEdge.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
