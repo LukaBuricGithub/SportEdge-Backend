@@ -68,5 +68,13 @@ namespace SportEdge.API.Repositories.Interface
         /// <returns>True if the cart was deleted successfully; otherwise, false.</returns>
         Task<bool> DeleteAsync(int cartId);
 
+
+        /// <summary>
+        /// Checks if there is a cart item with given list of productVariationId.
+        /// </summary>
+        /// <param name="productVariationIds">The list of productVariationId to check from.</param>
+        /// <returns>True if found at least one cart item; otherwise, false.</returns>
+        Task<bool> AnyCartItemContainsVariationsAsync(List<int> productVariationIds);
+
     }
 }

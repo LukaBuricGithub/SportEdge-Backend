@@ -58,5 +58,14 @@ namespace SportEdge.API.Repositories.Interface
         /// <param name="ids">The list of category IDs to search from.</param>
         /// <returns>A list of all matching category entities.</returns>
         Task<List<Category>> GetByIdsAsync(IEnumerable<int> ids);
+
+
+
+        /// <summary>
+        /// Retrieves all root categories.
+        /// </summary>
+        /// <returns>A list of all root categories.</returns>
+        Task<List<Category>> GetRootCategoriesAsync();
+
     }
 }

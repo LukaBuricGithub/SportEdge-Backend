@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Crypto;
 using SportEdge.API.Mappings;
 using SportEdge.API.Models.Domain;
 using SportEdge.API.Models.DTO;
@@ -19,12 +21,15 @@ namespace SportEdge.API.Services.Implementation
         private readonly IGenderRepository genderRepository;
         private readonly ISizeOptionRepository sizeOptionRepository;
         private readonly IProductVariationRepository productVariationRepository;
+        private readonly IOrderRepository orderRepository;
+        private readonly ICartRepository cartRepository;
         private readonly ProductMapping mapping;
         private readonly ProductVariationMapping productVariationMapping;
 
         public ProductService(IProductRepository productRepository,ICategoryRepository categoryRepository,
             IGenderRepository genderRepository,ISizeOptionRepository sizeOptionRepository, 
-            IProductVariationRepository productVariationRepository, ProductMapping mapping, ProductVariationMapping productVariationMapping) 
+            IProductVariationRepository productVariationRepository, ICartRepository cartRepository, 
+            IOrderRepository orderRepository, ProductMapping mapping, ProductVariationMapping productVariationMapping) 
         { 
             this.productRepository = productRepository;
             this.categoryRepository = categoryRepository;
@@ -33,6 +38,8 @@ namespace SportEdge.API.Services.Implementation
             this.productVariationRepository = productVariationRepository;
             this.mapping = mapping;
             this.productVariationMapping = productVariationMapping;
+            this.orderRepository = orderRepository;
+            this.cartRepository = cartRepository;
         }
 
         /// <inheritdoc/>
@@ -67,6 +74,15 @@ namespace SportEdge.API.Services.Implementation
         /// <inheritdoc/>
         public async Task<bool> DeleteAsync(int id)
         {
+            var productVariationIds = await productVariationRepository.GetAllProductVariationIdsForProductId(id);
+            var inCart = await cartRepository.AnyCartItemContainsVariationsAsync(productVariationIds);
+            var inOrders = await orderRepository.AnyOrderItemContainsVariationsAsync(productVariationIds);
+
+            if (inCart || inOrders) 
+            {
+                throw new InvalidOperationException($"Product with ID {id} cannot be deleted because it has related objects.");
+            }
+
             var deleted = await productRepository.DeleteAsync(id);
             if (!deleted) 
             {
@@ -94,8 +110,8 @@ namespace SportEdge.API.Services.Implementation
             return mapping.ToDto(product);
         }
 
-       
 
+        
         /// <inheritdoc/>
         public async Task<ProductDto> UpdateAsync(int id, UpdateProductRequestDto request)
         {
@@ -155,5 +171,34 @@ namespace SportEdge.API.Services.Implementation
             return products.Select(p => mapping.ToDto(p)).ToList();
 
         }
+
+        /// <inheritdoc/>
+        public async Task<List<ProductDto>> GetProductsByGenderTypeAsync(string name)
+        {
+            var parameter = name;
+            if (parameter.IsNullOrEmpty()) 
+            {
+                throw new InvalidDataException("Not valid data.");
+            }
+
+            var products = await productRepository.GetProductsByGenderTypeAsync(name);
+            return products.Select(p => mapping.ToDto(p)).ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<ProductDto>> FilterProductsAsync(ProductFilterDto filterDto)
+        {
+            var products = await productRepository.FilterProductsAsync(filterDto);
+
+            return products.Select(p => mapping.ToDto(p)).ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<ProductDto>> GetProductsByCategoryIdAsync(int categoryId) 
+        {
+            var products = await productRepository.GetProductsByCategoryIdAsync(categoryId);
+            return products.Select(p => mapping.ToDto(p)).ToList();
+        }
+
     }
 }

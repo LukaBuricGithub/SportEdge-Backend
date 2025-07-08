@@ -67,5 +67,14 @@ namespace SportEdge.API.Repositories.Implementation
                 .ToListAsync();
         }
 
+
+        /// <inheritdoc/>
+        public async Task<bool> AnyOrderItemContainsVariationsAsync(List<int> productVariationIds)
+        {
+            return await dbContext.OrderItems
+                .AnyAsync(oi => productVariationIds.Contains(oi.ProductVariationId));
+        }
+
+
     }
 }

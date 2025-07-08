@@ -93,5 +93,46 @@ namespace SportEdge.API.Controllers
 
             }
         }
+
+
+
+        /// <summary>
+        /// Retrieves all product variations for a specific product.
+        /// </summary>
+        /// <param name="productId">The ID of the product.</param>
+        /// <returns>A list of product variations for the given product.</returns>
+        [HttpGet("by-product/{productId}")]
+        public async Task<IActionResult> GetAllVariationsForProduct(int productId)
+        {
+            var productVariations = await productVariationService.GetAllForProduct(productId);
+            if (!productVariations.Any())
+            {
+                return Ok(new List<ProductVariationDto>());
+            }
+
+            return Ok(productVariations);
+        }
+
+
+
+        /// <summary>
+        /// Updates a batch of product variations which are found by their productId.
+        /// </summary>
+        /// <param name="request">The batch of updated product variations.</param>
+        /// <returns>The updated product variations if successful; otherwise, NotFound.</returns>
+        [HttpPut("batch-update-quantities")]
+        public async Task<IActionResult> UpdateQuantities([FromBody] UpdateMultipleProductVariationsRequestDto request)
+        {
+            try
+            {
+                var updatedProductVariations = await productVariationService.UpdateMultipleProductVariationsAsync(request);
+                return Ok(updatedProductVariations);
+            }
+            catch (KeyNotFoundException ex) 
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
     }
 }

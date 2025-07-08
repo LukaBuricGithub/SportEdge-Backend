@@ -86,5 +86,12 @@ namespace SportEdge.API.Services.Interface
         /// <param name="request">DTO containing message data.</param>
         Task CustomerServiceSendMessageAsync(UserSendMessageDto request);
 
+
+        /// <summary>
+        /// Sends an receipt to user's email address.
+        /// </summary>
+        /// <param name="request">DTO containing receipt data.</param>
+        Task SendReceiptEmailAsync(UserSendReceiptDto request);
+
     }
 }

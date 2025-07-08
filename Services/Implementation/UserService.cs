@@ -200,5 +200,31 @@ namespace SportEdge.API.Services.Implementation
             await emailSenderService.SendEmailAsync(emailTo, emailSubject, emailBody);
 
         }
+
+
+
+        /// <inheritdoc/>
+        public async Task SendReceiptEmailAsync(UserSendReceiptDto request)
+        {
+            var emailTo = request.Email;
+            var emailSubject = request.Subject;
+            var emailBody = $"Dear {request.FirstName} {request.LastName},\n\n{request.Content}";
+
+            byte[]? pdfBytes = null;
+
+            if (!string.IsNullOrEmpty(request.PdfBase64))
+            {
+                try
+                {
+                    pdfBytes = Convert.FromBase64String(request.PdfBase64);
+                }
+                catch (FormatException)
+                {
+                    throw new ArgumentException("Invalid PDF Base64 format.");
+                }
+            }
+
+            await emailSenderService.SendReceiptEmailAsync(emailTo, emailSubject, emailBody, pdfBytes, "Receipt.pdf");
+        }
     }
 }

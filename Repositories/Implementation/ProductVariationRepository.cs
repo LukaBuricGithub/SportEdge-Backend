@@ -36,6 +36,16 @@ namespace SportEdge.API.Repositories.Implementation
         }
 
         /// <inheritdoc/>
+        public async Task<List<ProductVariation>> GetAllForProduct(int productId)
+        {
+            return await dbContext.ProductVariations
+                .Where(pv => pv.ProductId == productId)
+                .Include(pv => pv.Product)
+                .Include(pv => pv.SizeOption)
+                .ToListAsync();
+        }
+
+        /// <inheritdoc/>
         public async Task<ProductVariation> GetAsync(int id)
         {
             return await dbContext.ProductVariations
@@ -51,5 +61,15 @@ namespace SportEdge.API.Repositories.Implementation
             await dbContext.SaveChangesAsync();
             return productVariation;
         }
+
+        /// <inheritdoc/>
+        public async Task<List<int>> GetAllProductVariationIdsForProductId(int productId)
+        {
+            return await dbContext.ProductVariations
+                .Where(pv => pv.ProductId == productId)
+                .Select(pv => pv.Id)
+                .ToListAsync();
+        }
+
     }
 }

@@ -39,6 +39,14 @@ namespace SportEdge.API.Services.Implementation
 
 
         /// <inheritdoc/>
+        public async Task<List<ProductVariationDto>> GetAllForProduct (int productId) 
+        { 
+            var productVariations = await productVariationRepository.GetAllForProduct(productId);
+            return productVariations.Select(p => mapping.ToDto(p)).ToList();
+        }
+
+
+        /// <inheritdoc/>
         public async Task<ProductVariationDto> GetAsync(int id)
         {
             var productVariation = await productVariationRepository.GetAsync(id);
@@ -51,6 +59,7 @@ namespace SportEdge.API.Services.Implementation
         }
 
 
+  
         /// <inheritdoc/>
         public async Task<ProductVariationDto> UpdateAsync(int id, UpdateProductVariationRequestDto request)
         {
@@ -68,6 +77,32 @@ namespace SportEdge.API.Services.Implementation
 
             var updatedProductVariation = await productVariationRepository.UpdateAsync(existingProductVariation);
             return mapping.ToDto(updatedProductVariation);
+        }
+
+
+
+        public async Task<List<ProductVariationDto>> UpdateMultipleProductVariationsAsync(UpdateMultipleProductVariationsRequestDto request) 
+        {
+            var updatedVariations = new List<ProductVariationDto>();
+
+            foreach (var variationDto in request.Variations)
+            {
+                var existing = await productVariationRepository.GetAsync(variationDto.Id);
+                
+                if (existing == null)
+                {
+                    throw new KeyNotFoundException($"Product variation with ID {variationDto.Id} not found.");
+                }
+                
+
+                existing.QuantityInStock = variationDto.QuantityInStock;
+
+                var updated = await productVariationRepository.UpdateAsync(existing);
+                updatedVariations.Add(mapping.ToDto(updated));
+            }
+
+            return updatedVariations;
+
         }
     }
 }

@@ -57,6 +57,5 @@ namespace SportEdge.API.Services.Interface
         /// <param name="genderId">The ID of gender.</param>
         /// <returns>A list of size option DTOs for desired gender.</returns>
         Task<List<SizeOptionDto>> GetSizeOptionsByGenderIdAsync(int genderId); 
-
     }
 }

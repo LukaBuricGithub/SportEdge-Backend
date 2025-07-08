@@ -82,6 +82,21 @@ namespace SportEdge.API.Controllers
         }
 
 
+
+        /// <summary>
+        /// Retrieves all root categories.
+        /// </summary>
+        /// <returns>A list of all root categories.</returns>
+        [AllowAnonymous]
+        [HttpGet("root-categories")]
+        public async Task<IActionResult> GetRootCategories()
+        {
+            var categories = await categoryService.GetRootCategoriesAsync();
+            return Ok(categories);
+        }
+
+
+
         /// <summary>
         /// Updates an existing category by ID.
         /// </summary>

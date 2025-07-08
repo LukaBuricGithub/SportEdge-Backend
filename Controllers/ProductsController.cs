@@ -96,7 +96,75 @@ namespace SportEdge.API.Controllers
         public async Task<IActionResult> SearchProduct([FromQuery] string? searchTerm = null)
         {
             var products = await productService.SearchProductsAsync(searchTerm);
+            if (!products.Any())
+            {
+                return Ok(new List<ProductDto>());
+            }
             return Ok(products);
+        }
+
+
+
+        /// <summary>
+        /// Searches for products by filter model.
+        /// </summary>
+        /// <param name="filterDto">The filter model containing filter data.</param>
+        /// <returns>A list of matching products.</returns>
+        [AllowAnonymous]
+        [HttpPost("filter")]
+        public async Task<IActionResult> FilterProducts([FromBody] ProductFilterDto filterDto)
+        {
+            var products = await productService.FilterProductsAsync(filterDto);
+            if (!products.Any())
+            {
+                return Ok(new List<ProductDto>());
+            }
+            return Ok(products);
+        }
+
+
+        /// <summary>
+        /// Searches for products that have a categoryId as in entry parameter.
+        /// </summary>
+        /// <param name="categoryId">The categoryId you want products to have.</param>
+        /// <returns>A list of  products that have matching categoryId.</returns>
+        [AllowAnonymous]
+        [HttpGet("search-category")]
+        public async Task<IActionResult> GetProductByCategory(int? categoryId) 
+        {
+            if (!categoryId.HasValue || categoryId<=0) 
+            {
+                return BadRequest(new { message = "Please enter a positive number for categoryId." });
+            }
+            var products = await productService.GetProductsByCategoryIdAsync(categoryId.Value);
+            if (!products.Any())
+            {
+                return Ok(new List<ProductDto>());
+            }
+            return Ok(products);
+   
+        }
+
+
+        /// <summary>
+        /// Searches for products by their gender type.
+        /// </summary>
+        /// <param name="name">The search term to use for filtering products by gender type.</param>
+        /// <returns>A list of matching products.</returns>
+        [AllowAnonymous]
+        [HttpGet("search-gender-type")]
+        public async Task<IActionResult> GetProductsByGenderTypeAsync(string name) 
+        {
+            try 
+            {
+                var products = await productService.GetProductsByGenderTypeAsync(name);
+                return Ok(products);
+            
+            }
+            catch (InvalidDataException ex) 
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
@@ -142,6 +210,10 @@ namespace SportEdge.API.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex) 
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

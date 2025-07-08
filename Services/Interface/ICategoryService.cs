@@ -46,5 +46,13 @@ namespace SportEdge.API.Services.Interface
         /// <param name="id">The ID of the category to delete.</param>
         /// <returns>True if the category was deleted successfully; otherwise, false.</returns>
         Task<bool> DeleteAsync(int id);
+
+
+
+        /// <summary>
+        /// Retrieves all root categories.
+        /// </summary>
+        /// <returns>Retrieves all root categories.</returns>
+        Task<List<CategoryDto>> GetRootCategoriesAsync();
     }
 }

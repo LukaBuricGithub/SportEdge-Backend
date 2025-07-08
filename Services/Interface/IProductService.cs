@@ -1,4 +1,5 @@
-﻿using SportEdge.API.Models.DTO;
+﻿using SportEdge.API.Models.Domain;
+using SportEdge.API.Models.DTO;
 
 namespace SportEdge.API.Services.Interface
 {
@@ -54,6 +55,31 @@ namespace SportEdge.API.Services.Interface
         /// <param name="query">The query by which products are searched.</param>
         /// <returns>A list of matching product DTOs.</returns>
         Task<List<ProductDto>> SearchProductsAsync(string? query);
+
+
+        /// <summary>
+        /// Retrieves all products that have a gender type as in entry query.
+        /// </summary>
+        /// <param name="name">The name of gender type you are looking for.</param>
+        /// <returns>A list of matching product DTOs.</returns>
+        Task<List<ProductDto>> GetProductsByGenderTypeAsync(string name);
+
+
+
+        /// <summary>
+        /// Retrieves all products that match the given filter object.
+        /// </summary>
+        /// <param name="filter">The filter object used for searching products.</param>
+        /// <returns>The list of matching products.</returns>
+        Task<List<ProductDto>> FilterProductsAsync(ProductFilterDto filter);
+
+
+        /// <summary>
+        /// Retrieves all products that have a categoryId as in the entry parameter.
+        /// </summary>
+        /// <param name="categoryId">The categoryId you wnt products to have.</param>
+        /// <returns>A list of matching product DTOs.</returns>
+        Task<List<ProductDto>> GetProductsByCategoryIdAsync(int categoryId);
 
     }
 }

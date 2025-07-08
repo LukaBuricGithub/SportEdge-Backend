@@ -38,5 +38,23 @@ namespace SportEdge.API.Services.Interface
         /// <param name="request">DTO containing updated data.</param>
         /// <returns>The updated product variation DTO.</returns>
         Task<ProductVariationDto> UpdateAsync(int id, UpdateProductVariationRequestDto request);
+
+
+
+
+        /// <summary>
+        /// Updates multiple product variations with new data.
+        /// </summary>
+        /// <param name="request">DTO containing updated data.</param>
+        /// <returns>The list of updated product variations in DTO.</returns>
+        Task<List<ProductVariationDto>> UpdateMultipleProductVariationsAsync(UpdateMultipleProductVariationsRequestDto request);
+
+
+        /// <summary>
+        /// Retrieves all product variations that associated with a specific product ID.
+        /// </summary>
+        /// <param name="productId">Product ID.</param>
+        /// <returns>A list of matching product variation DTOs.</returns>
+        Task<List<ProductVariationDto>> GetAllForProduct(int productId);
     }
 }

@@ -36,5 +36,14 @@ namespace SportEdge.API.Repositories.Interface
         /// <returns>A list of all order entities for a user.</returns>
         Task<List<Order>> GetAllByUserIdAsync(int userId);
 
+
+        /// <summary>
+        /// Checks if there is an order item with given list of productVariationId.
+        /// </summary>
+        /// <param name="productVariationIds">The list of productVariationId to check from.</param>
+        /// <returns>True if found at least one order item; otherwise, false.</returns>
+        Task<bool> AnyOrderItemContainsVariationsAsync(List<int> productVariationIds);
+
+
     }
 }

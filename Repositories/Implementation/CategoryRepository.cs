@@ -125,5 +125,14 @@ namespace SportEdge.API.Repositories.Implementation
                 .Where(c => ids.Contains(c.Id))
                 .ToListAsync();
         }
+
+
+        /// <inheritdoc/>
+        public async Task<List<Category>> GetRootCategoriesAsync()
+        {
+            return await dbContext.Categories
+                .Where(c => c.ParentCategoryId == null)
+                .ToListAsync();
+        }
     }
 }

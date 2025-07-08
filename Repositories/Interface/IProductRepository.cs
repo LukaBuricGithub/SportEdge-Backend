@@ -61,5 +61,28 @@ namespace SportEdge.API.Repositories.Interface
         Task<List<Product>> SearchProductsAsync(string? query);
 
 
+        /// <summary>
+        /// Retrieves all products that have the gender type in query.
+        /// </summary>
+        /// <param name="name">The name of gender type you are looking for.</param>
+        /// <returns>A list of matching product entities that match the query.</returns>
+        Task<List<Product>> GetProductsByGenderTypeAsync(string name);
+
+
+        /// <summary>
+        /// Retrieves all products that match the given filter object.
+        /// </summary>
+        /// <param name="filter">The filter object used for searching products.</param>
+        /// <returns>The list of matching products.</returns>
+        Task<List<Product>> FilterProductsAsync(ProductFilterDto filter);
+
+
+        /// <summary>
+        /// Retrieves all products that have categoryId from the query.
+        /// </summary>
+        /// <param name="categoryId">The categoryId you want products to have.</param>
+        /// <returns>The list of matching products.</returns>
+        Task<List<Product>> GetProductsByCategoryIdAsync(int categoryId);
+
     }
 }

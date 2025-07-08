@@ -108,5 +108,13 @@ namespace SportEdge.API.Services.Implementation
             };
 
         }
+
+
+        /// <inheritdoc/>
+        public async Task<List<CategoryDto>> GetRootCategoriesAsync()
+        {
+            var categories = await categoryRepository.GetRootCategoriesAsync();
+            return categories.Select(c => mapping.ToDto(c)).ToList();
+        }
     }
 }

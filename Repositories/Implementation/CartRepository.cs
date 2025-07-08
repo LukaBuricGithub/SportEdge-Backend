@@ -155,5 +155,13 @@ namespace SportEdge.API.Repositories.Implementation
             await dbContext.SaveChangesAsync();
             return true;
         }
+
+        /// <inheritdoc/>
+        public async Task<bool> AnyCartItemContainsVariationsAsync(List<int> productVariationIds)
+        {
+            return await dbContext.CartItems
+                .AnyAsync(ci => productVariationIds.Contains(ci.ProductVariationId));
+        }
+
     }
 }

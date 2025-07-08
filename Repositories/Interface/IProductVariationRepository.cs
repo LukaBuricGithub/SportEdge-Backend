@@ -39,5 +39,23 @@ namespace SportEdge.API.Repositories.Interface
         /// <returns>The updated product variation entity.</returns>
         Task<ProductVariation> UpdateAsync(ProductVariation productVariation);
 
+
+
+        /// <summary>
+        /// Retrieves all ids of all product variations associated with a specific product ID.
+        /// </summary>
+        /// <param name="productId">Product ID.</param>
+        /// <returns>The list of product variation Ids.</returns>
+        Task<List<int>> GetAllProductVariationIdsForProductId(int productId);
+
+
+        /// <summary>
+        /// Retrieves all product variations associated with a specific product ID.
+        /// </summary>
+        /// <param name="productId">Product ID.</param>
+        /// <returns>>A list of all matching product variation entities</returns>
+        Task<List<ProductVariation>> GetAllForProduct(int productId);
+
+
     }
 }
