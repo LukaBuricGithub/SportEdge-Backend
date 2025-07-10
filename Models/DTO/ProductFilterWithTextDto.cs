@@ -1,9 +1,9 @@
 ﻿namespace SportEdge.API.Models.DTO
 {
     /// <summary>
-    /// DTO representing a filter for searching products.
+    /// DTO representing a filter for searching products, this version is extended with searchText field.
     /// </summary>
-    public class ProductFilterDto
+    public class ProductFilterWithTextDto
     {
         /// <summary>
         /// List of category IDs to search from.
@@ -14,7 +14,7 @@
         /// Gender ID.
         /// </summary>
         public int? GenderId { get; set; }
-        
+
         /// <summary>
         /// Brand ID.
         /// </summary>
@@ -30,6 +30,10 @@
         /// </summary>
         public decimal? MaxPrice { get; set; }
 
+        /// <summary>
+        /// Search term used for filtering products.
+        /// </summary>
+        public string? searchText { get; set; }
 
 
         /// <summary>
@@ -45,7 +49,6 @@
         /// <summary>
         /// Name to which you are sorting products.
         /// </summary>
-        public string? SortBy {  get; set; }
-
+        public string? SortBy { get; set; }
     }
 }

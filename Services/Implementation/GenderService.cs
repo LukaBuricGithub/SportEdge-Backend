@@ -73,5 +73,16 @@ namespace SportEdge.API.Services.Implementation
             var updatedGender = await genderRepository.UpdateAsync(existingGender);
             return mapping.ToDto(updatedGender);
         }
+
+        /// <inheritdoc/>
+        public async Task<int> GetGenderIdFromNameAsync(string name) 
+        {
+            var Id = await genderRepository.GetGenderIdFromNameAsync(name);
+            if ( Id == null) 
+            {
+                throw new KeyNotFoundException($"Gender with name: {name} not found.");
+            }
+            return (int)Id;
+        }
     }
 }

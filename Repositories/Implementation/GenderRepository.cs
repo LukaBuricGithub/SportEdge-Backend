@@ -59,5 +59,15 @@ namespace SportEdge.API.Repositories.Implementation
             await dbContext.SaveChangesAsync();
             return gender;
         }
+
+        /// <inheritdoc/>
+        public async Task<int?> GetGenderIdFromNameAsync(string name) 
+        {
+            var gender = await dbContext.Genders
+                .Where(g => g.Name.ToLower() == name.ToLower())
+                .FirstOrDefaultAsync();
+
+            return gender?.Id;
+        }
     }
 }

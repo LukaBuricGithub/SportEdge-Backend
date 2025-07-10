@@ -92,14 +92,14 @@ namespace SportEdge.API.Controllers
         /// <param name="searchTerm">The search term to use for filtering products.</param>
         /// <returns>A list of matching products.</returns>
         [AllowAnonymous]
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchProduct([FromQuery] string? searchTerm = null)
+        [HttpPost("search")]
+        public async Task<IActionResult> SearchProduct([FromBody] ProductFilterDto filterDto,[FromQuery] string? searchTerm = null)
         {
-            var products = await productService.SearchProductsAsync(searchTerm);
-            if (!products.Any())
-            {
-                return Ok(new List<ProductDto>());
-            }
+            var products = await productService.SearchProductsAsync(searchTerm, filterDto);
+            //if (!products.Any())
+            //{
+            //    return Ok(new List<ProductDto>());
+            //}
             return Ok(products);
         }
 
@@ -114,12 +114,12 @@ namespace SportEdge.API.Controllers
         [HttpPost("filter")]
         public async Task<IActionResult> FilterProducts([FromBody] ProductFilterDto filterDto)
         {
-            var products = await productService.FilterProductsAsync(filterDto);
-            if (!products.Any())
-            {
-                return Ok(new List<ProductDto>());
-            }
-            return Ok(products);
+            var productsFiltered = await productService.FilterProductsAsync(filterDto);
+            //if (!products.Any())
+            //{
+                //return Ok(new List<ProductDto>());
+            //}
+            return Ok(productsFiltered);
         }
 
 
@@ -129,20 +129,29 @@ namespace SportEdge.API.Controllers
         /// <param name="categoryId">The categoryId you want products to have.</param>
         /// <returns>A list of  products that have matching categoryId.</returns>
         [AllowAnonymous]
-        [HttpGet("search-category")]
-        public async Task<IActionResult> GetProductByCategory(int? categoryId) 
+        [HttpPost("search-category")]
+        public async Task<IActionResult> GetProductByCategory(int? categoryId, [FromBody] ProductFilterDto filterDto) 
         {
             if (!categoryId.HasValue || categoryId<=0) 
             {
                 return BadRequest(new { message = "Please enter a positive number for categoryId." });
             }
-            var products = await productService.GetProductsByCategoryIdAsync(categoryId.Value);
-            if (!products.Any())
-            {
-                return Ok(new List<ProductDto>());
-            }
+            var products = await productService.GetProductsByCategoryIdAsync(categoryId.Value,filterDto);
+            //if (!products.Any())
+            //{
+                //return Ok(new List<ProductDto>());
+            //}
             return Ok(products);
    
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost("filter-products")]
+        public async Task<IActionResult> GetFilteredProducts([FromBody] ProductFilterWithTextDto filterDto) 
+        {
+            var filteredProducts = await productService.GetFilteredProductsAsync(filterDto);
+            return Ok(filteredProducts);
         }
 
 
@@ -152,12 +161,12 @@ namespace SportEdge.API.Controllers
         /// <param name="name">The search term to use for filtering products by gender type.</param>
         /// <returns>A list of matching products.</returns>
         [AllowAnonymous]
-        [HttpGet("search-gender-type")]
-        public async Task<IActionResult> GetProductsByGenderTypeAsync(string name) 
+        [HttpPost("search-gender-type")]
+        public async Task<IActionResult> GetProductsByGenderTypeAsync(string name, [FromBody] ProductFilterDto filterDto) 
         {
             try 
             {
-                var products = await productService.GetProductsByGenderTypeAsync(name);
+                var products = await productService.GetProductsByGenderTypeAsync(name, filterDto);
                 return Ok(products);
             
             }

@@ -84,10 +84,6 @@ namespace SportEdge.API.Repositories.Implementation
 
 
 
-
-     
-
-
         /*
         public async Task<Product> UpdateAsync(int id, Product product, IEnumerable<int> categoryIds)
         {
@@ -138,8 +134,86 @@ namespace SportEdge.API.Repositories.Implementation
             return product;
         }
 
+
+
+
+        public async Task<FilteredProductsResultDomain> GetFilteredProductsAsync( ProductFilterWithTextDto filter)
+        {
+            var products = dbContext.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Categories)
+                .Include(p => p.ProductVariations)
+                    .ThenInclude(pv => pv.SizeOption)
+                .Include(p => p.Images)
+                .Include(p => p.Gender)
+                .AsQueryable();
+
+            
+            if (!string.IsNullOrWhiteSpace(filter.searchText))
+            {
+                var terms = filter.searchText.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var term in terms)
+                {
+                    products = products.Where(p =>
+                        EF.Functions.Like(p.Name.ToLower(), $"%{term}%") ||
+                        EF.Functions.Like(p.Brand.Name.ToLower(), $"%{term}%") ||
+                        p.Categories.Any(c => EF.Functions.Like(c.Name.ToLower(), $"%{term}%")));
+                }
+            }
+
+            if (filter.CategoryIds != null && filter.CategoryIds.Any())
+            {
+                products = products.Where(p => p.Categories.Any(c => filter.CategoryIds.Contains(c.Id)));
+            }
+
+            if (filter.GenderId.HasValue)
+            {
+                products = products.Where(p => p.GenderId == filter.GenderId.Value);
+            }
+
+            if (filter.BrandId.HasValue)
+            {
+                products = products.Where(p => p.BrandId == filter.BrandId.Value);
+            }
+
+            if (filter.MinPrice.HasValue)
+            {
+                products = products.Where(p => (p.DiscountedPrice ?? p.Price) >= filter.MinPrice.Value);
+            }
+
+            if (filter.MaxPrice.HasValue)
+            {
+                products = products.Where(p => (p.DiscountedPrice ?? p.Price) <= filter.MaxPrice.Value);
+            }
+
+            products = filter.SortBy?.ToLower() switch
+            {
+                "name_asc" => products.OrderBy(p => p.Name),
+                "name_desc" => products.OrderByDescending(p => p.Name),
+                "price_asc" => products.OrderBy(p => (p.DiscountedPrice ?? p.Price)),
+                "price_desc" => products.OrderByDescending(p => (p.DiscountedPrice ?? p.Price)),
+                _ => products.OrderBy(p => p.Name) // default
+            };
+
+            var totalCount = await products.CountAsync();
+
+            var pagedProducts = await products
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+            return new FilteredProductsResultDomain
+            {
+                ProductsDomain = pagedProducts,
+                TotalCountDomain = totalCount
+            };
+        }
+
+
+
         /// <inheritdoc/>
-        public async Task<List<Product>> SearchProductsAsync(string? query)
+        public async Task<FilteredProductsResultDomain> SearchProductsAsync(string? query, ProductFilterDto filter)
         {
       
             var products = dbContext.Products
@@ -165,41 +239,87 @@ namespace SportEdge.API.Repositories.Implementation
                         p.Categories.Any(c => EF.Functions.Like(c.Name, $"%{term}%")));
                 }
             }
+            var totalCount = await products.CountAsync();
 
-            return await products.ToListAsync();
+            var pagedProducts = await products
+             .Skip((filter.PageNumber - 1) * filter.PageSize)
+             .Take(filter.PageSize)
+             .ToListAsync();
+
+            return new FilteredProductsResultDomain
+            {
+                ProductsDomain = pagedProducts,
+                TotalCountDomain = totalCount
+            };
         }
 
         /// <inheritdoc/>
-        public async Task<List<Product>> GetProductsByGenderTypeAsync(string name)
+        public async Task<FilteredProductsResultDomain> GetProductsByGenderTypeAsync(string name, ProductFilterDto filter)
         {
-            return await dbContext.Products
+            //return await dbContext.Products
+            //    .Include(p => p.Brand)
+            //    .Include(p => p.Categories)
+            //    .Include(p => p.ProductVariations)
+            //        .ThenInclude(pv => pv.SizeOption)
+            //    .Include(p => p.Images)
+            //    .Include(p => p.Gender)
+            //    .Where(p => p.Gender != null && p.Gender.Name.ToLower() == name.ToLower())
+            //    .ToListAsync();
+
+
+            var query =  dbContext.Products
+             .Include(p => p.Brand)
+             .Include(p => p.Categories)
+             .Include(p => p.ProductVariations)
+                 .ThenInclude(pv => pv.SizeOption)
+             .Include(p => p.Images)
+             .Include(p => p.Gender)
+             .Where(p => p.Gender != null && p.Gender.Name.ToLower() == name.ToLower());
+
+            var totalCount = await query.CountAsync();
+
+            var pagedProducts = await query
+             .Skip((filter.PageNumber - 1) * filter.PageSize)
+             .Take(filter.PageSize)
+             .ToListAsync();
+
+            return new FilteredProductsResultDomain
+            {
+                ProductsDomain = pagedProducts,
+                TotalCountDomain = totalCount
+            };
+
+        }
+
+
+        /// <inheritdoc/>
+        public async Task<FilteredProductsResultDomain> GetProductsByCategoryIdAsync(int categoryId,ProductFilterDto filter)
+        {
+            var query = dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Categories)
                 .Include(p => p.ProductVariations)
                     .ThenInclude(pv => pv.SizeOption)
                 .Include(p => p.Images)
                 .Include(p => p.Gender)
-                .Where(p => p.Gender != null && p.Gender.Name.ToLower() == name.ToLower())
+                .Where(p => p.Categories.Any(c => c.Id == categoryId));
+
+            var totalCount = await query.CountAsync();
+
+            var pagedProducts = await query
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
                 .ToListAsync();
+
+            return new FilteredProductsResultDomain
+            {
+                ProductsDomain = pagedProducts,
+                TotalCountDomain = totalCount
+            };
+
         }
 
-
-        /// <inheritdoc/>
-        public async Task<List<Product>> GetProductsByCategoryIdAsync(int categoryId)
-        {
-            return await dbContext.Products
-                .Include(p => p.Brand)
-                .Include(p => p.Categories)
-                .Include(p => p.ProductVariations)
-                    .ThenInclude(pv => pv.SizeOption)
-                .Include(p => p.Images)
-                .Include(p => p.Gender)
-                .Where(p => p.Categories.Any(c => c.Id == categoryId))
-                .ToListAsync();
-        }
-
-        /// <inheritdoc/>
-        public async Task<List<Product>> FilterProductsAsync(ProductFilterDto filter)
+        public async Task<FilteredProductsResultDomain> FilterProductsAsync(ProductFilterDto filter)
         {
             var products = dbContext.Products
                 .Include(p => p.Brand)
@@ -226,17 +346,6 @@ namespace SportEdge.API.Repositories.Implementation
                 products = products.Where(p => p.BrandId == filter.BrandId.Value);
             }
 
-            //if (filter.MinPrice.HasValue)
-            //{
-            //    products = products.Where(p => p.Price >= filter.MinPrice.Value);
-            //}
-
-            //if (filter.MaxPrice.HasValue)
-            //{
-            //    products = products.Where(p => p.Price <= filter.MaxPrice.Value);
-            //}
-
-
             if (filter.MinPrice.HasValue)
             {
                 products = products.Where(p =>
@@ -249,7 +358,33 @@ namespace SportEdge.API.Repositories.Implementation
                     (p.DiscountedPrice ?? p.Price) <= filter.MaxPrice.Value);
             }
 
-            return await products.ToListAsync();
+
+            products = filter.SortBy?.ToLower() switch
+            {
+
+                "name_asc" => products.OrderBy(p => p.Name),
+                "name_desc" => products.OrderByDescending(p => p.Name),
+                "price_asc" => products.OrderBy(p => (p.DiscountedPrice ?? p.Price)),
+                "price_desc" => products.OrderByDescending(p => (p.DiscountedPrice ?? p.Price)),
+                _ => products.OrderBy(p => p.Name)
+            };
+
+            var totalCount = await products.CountAsync();
+
+            var pagedProducts = await products
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+
+            return new FilteredProductsResultDomain
+            {
+                ProductsDomain = pagedProducts,
+                TotalCountDomain = totalCount
+            };
+            //FilteredProductsResultDomain
+            //return await products.ToListAsync();
+
         }
 
     }

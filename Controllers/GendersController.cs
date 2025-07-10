@@ -58,6 +58,7 @@ namespace SportEdge.API.Controllers
         }
 
 
+
         /// <summary>
         /// Retrieves a specific gender by ID.
         /// </summary>
@@ -73,6 +74,27 @@ namespace SportEdge.API.Controllers
                 return Ok(gender);
             }
             catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+
+        /// <summary>
+        /// Retrieves a gender type ID based on it's name.
+        /// </summary>
+        /// <param name="name">The name of the gender type to look for.</param>
+        /// <returns>The gender ID if found; otherwise, NotFound.</returns>
+        [AllowAnonymous]
+        [HttpGet("gender-type-id")]
+        public async Task<IActionResult> GetGenderIdFromNameAsync(string name) 
+        {
+            try
+            {
+                var id = await genderService.GetGenderIdFromNameAsync((string)name);
+                return Ok(id);
+            }
+            catch (KeyNotFoundException ex) 
             {
                 return NotFound(ex.Message);
             }

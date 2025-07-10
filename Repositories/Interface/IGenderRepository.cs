@@ -46,5 +46,13 @@ namespace SportEdge.API.Repositories.Interface
         /// <returns>True if deleted successfully; otherwise, false.</returns>
         Task<bool> DeleteAsync(int id);
 
+        /// <summary>
+        /// Returns a gender ID.
+        /// </summary>
+        /// <param name="name">The name of gender whose ID to return.</param>
+        /// <returns>Gender ID whose name matches the one used as a parameter.</returns>
+        Task<int?> GetGenderIdFromNameAsync(string name);
+
+
     }
 }

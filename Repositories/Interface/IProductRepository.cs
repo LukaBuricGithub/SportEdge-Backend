@@ -57,16 +57,18 @@ namespace SportEdge.API.Repositories.Interface
         /// Retrieves all products that match query.
         /// </summary>
         /// <param name="query">The query by which products are searched.</param>
+        /// <param name="filter">Filter object that has pagination options.</param>
         /// <returns>A list of matching product entities that match the query.</returns>
-        Task<List<Product>> SearchProductsAsync(string? query);
+        Task<FilteredProductsResultDomain> SearchProductsAsync(string? query, ProductFilterDto filter);
 
 
         /// <summary>
         /// Retrieves all products that have the gender type in query.
         /// </summary>
         /// <param name="name">The name of gender type you are looking for.</param>
+        /// <param name="filter">Filter object that has pagination options.</param>
         /// <returns>A list of matching product entities that match the query.</returns>
-        Task<List<Product>> GetProductsByGenderTypeAsync(string name);
+        Task<FilteredProductsResultDomain> GetProductsByGenderTypeAsync(string name, ProductFilterDto filter);
 
 
         /// <summary>
@@ -74,15 +76,28 @@ namespace SportEdge.API.Repositories.Interface
         /// </summary>
         /// <param name="filter">The filter object used for searching products.</param>
         /// <returns>The list of matching products.</returns>
-        Task<List<Product>> FilterProductsAsync(ProductFilterDto filter);
+        //Task<List<Product>> FilterProductsAsync(ProductFilterDto filter);
+        Task<FilteredProductsResultDomain> FilterProductsAsync(ProductFilterDto filter);
+
+
 
 
         /// <summary>
         /// Retrieves all products that have categoryId from the query.
         /// </summary>
         /// <param name="categoryId">The categoryId you want products to have.</param>
+        /// <param name="filter">Filter object that has pagination options.</param>
         /// <returns>The list of matching products.</returns>
-        Task<List<Product>> GetProductsByCategoryIdAsync(int categoryId);
+        //Task<List<Product>> GetProductsByCategoryIdAsync(int categoryId);
+        Task<FilteredProductsResultDomain> GetProductsByCategoryIdAsync(int categoryId,ProductFilterDto filter);
 
+
+
+        /// <summary>
+        /// Retrieves all products that match the given filter object.
+        /// </summary>
+        /// <param name="filter">The filter object used for searching products.</param>
+        /// <returns>The list of matching products.</returns>
+        Task<FilteredProductsResultDomain> GetFilteredProductsAsync(ProductFilterWithTextDto filter);
     }
 }

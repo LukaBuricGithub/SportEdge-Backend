@@ -7,6 +7,7 @@ using SportEdge.API.Models.DTO;
 using SportEdge.API.Repositories.Implementation;
 using SportEdge.API.Repositories.Interface;
 using SportEdge.API.Services.Interface;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SportEdge.API.Services.Implementation
 {
@@ -165,15 +166,33 @@ namespace SportEdge.API.Services.Implementation
         }
 
         /// <inheritdoc/>
-        public async Task<List<ProductDto>> SearchProductsAsync(string? query)
+        public async Task<FilteredProductsResultDto> SearchProductsAsync(string? query, ProductFilterDto filterDto)
         {
-            var products = await productRepository.SearchProductsAsync(query);
-            return products.Select(p => mapping.ToDto(p)).ToList();
+            var products = await productRepository.SearchProductsAsync(query, filterDto);
+            return new FilteredProductsResultDto
+            {
+                Products = products.ProductsDomain.Select(p => mapping.ToDto(p)).ToList(),
+                TotalCount = products.TotalCountDomain
+            };
+            //return products.Select(p => mapping.ToDto(p)).ToList();
 
         }
 
+
+        public async Task<FilteredProductsResultDto> GetFilteredProductsAsync(ProductFilterWithTextDto filter) 
+        {
+            var products = await productRepository.GetFilteredProductsAsync(filter);
+            return new FilteredProductsResultDto
+            {
+                Products = products.ProductsDomain.Select(p => mapping.ToDto(p)).ToList(),
+                TotalCount = products.TotalCountDomain
+            };
+
+        }
+
+
         /// <inheritdoc/>
-        public async Task<List<ProductDto>> GetProductsByGenderTypeAsync(string name)
+        public async Task<FilteredProductsResultDto> GetProductsByGenderTypeAsync(string name, ProductFilterDto filterDto)
         {
             var parameter = name;
             if (parameter.IsNullOrEmpty()) 
@@ -181,23 +200,42 @@ namespace SportEdge.API.Services.Implementation
                 throw new InvalidDataException("Not valid data.");
             }
 
-            var products = await productRepository.GetProductsByGenderTypeAsync(name);
-            return products.Select(p => mapping.ToDto(p)).ToList();
+            var products = await productRepository.GetProductsByGenderTypeAsync(name, filterDto);
+
+            return new FilteredProductsResultDto
+            {
+                Products = products.ProductsDomain.Select(p => mapping.ToDto(p)).ToList(),
+                TotalCount = products.TotalCountDomain
+            };
+
+            //return products.Select(p => mapping.ToDto(p)).ToList();
         }
 
         /// <inheritdoc/>
-        public async Task<List<ProductDto>> FilterProductsAsync(ProductFilterDto filterDto)
+        public async Task<FilteredProductsResultDto> FilterProductsAsync(ProductFilterDto filterDto)
         {
-            var products = await productRepository.FilterProductsAsync(filterDto);
+            var productsfilter = await productRepository.FilterProductsAsync(filterDto);
 
-            return products.Select(p => mapping.ToDto(p)).ToList();
+            return new FilteredProductsResultDto
+            {
+                Products = productsfilter.ProductsDomain.Select(p => mapping.ToDto(p)).ToList(),
+                TotalCount = productsfilter.TotalCountDomain
+            };
+
+            //return products.Select(p => mapping.ToDto(p)).ToList();
         }
 
         /// <inheritdoc/>
-        public async Task<List<ProductDto>> GetProductsByCategoryIdAsync(int categoryId) 
+        public async Task<FilteredProductsResultDto> GetProductsByCategoryIdAsync(int categoryId,ProductFilterDto filterDto) 
         {
-            var products = await productRepository.GetProductsByCategoryIdAsync(categoryId);
-            return products.Select(p => mapping.ToDto(p)).ToList();
+            var products = await productRepository.GetProductsByCategoryIdAsync(categoryId,filterDto);
+            return new FilteredProductsResultDto
+            {
+                Products = products.ProductsDomain.Select(p => mapping.ToDto(p)).ToList(),
+                TotalCount = products.TotalCountDomain
+            };
+
+            //return products.Select(p => mapping.ToDto(p)).ToList();
         }
 
     }
