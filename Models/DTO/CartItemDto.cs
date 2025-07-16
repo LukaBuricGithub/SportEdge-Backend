@@ -45,5 +45,15 @@
         /// Quantity of cart item.
         /// </summary>
         public int Quantity { get; set; }
+
+        /// <summary>
+        /// The ID of the product.
+        /// </summary>
+        public int ProductId { get; set; }
+
+        /// <summary>
+        /// Url for image to display.
+        /// </summary>
+        public string? ImageUrl { get; set; }
     }
 }

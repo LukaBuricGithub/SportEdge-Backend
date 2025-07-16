@@ -146,6 +146,11 @@ namespace SportEdge.API.Controllers
         }
 
 
+        /// <summary>
+        /// Searches for products by filter model (which contains text-search).
+        /// </summary>
+        /// <param name="filterDto">The filter model containing filter data.</param>
+        /// <returns>A list of matching products.</returns>
         [AllowAnonymous]
         [HttpPost("filter-products")]
         public async Task<IActionResult> GetFilteredProducts([FromBody] ProductFilterWithTextDto filterDto) 

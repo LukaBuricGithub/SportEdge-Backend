@@ -27,9 +27,11 @@ namespace SportEdge.API.Mappings
                     ProductVariationId = ci.ProductVariationId,
                     ProductName = ci.ProductVariation.Product.Name,
                     SizeOptionName = ci.ProductVariation.SizeOption.SizeName,
-                    PriceAtTime = ci.PriceAtTime,
+                    PriceAtTime = ci.ProductVariation.Product.DiscountedPrice ?? ci.ProductVariation.Product.Price,
+                    //PriceAtTime = ci.PriceAtTime,
                     //PriceAtTime = ci.ProductVariation.Product.Price,
-                    Quantity = ci.Quantity
+                    Quantity = ci.Quantity,
+                    ProductId = ci.ProductVariation.Product.Id
                 }).ToList()
             };
         }

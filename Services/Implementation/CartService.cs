@@ -46,6 +46,11 @@ namespace SportEdge.API.Services.Implementation
                 throw new KeyNotFoundException($"Product variation with ID {productVariationId} not found.");
             }
 
+            if (quantity <= 0) 
+            {
+                throw new InvalidOperationException($"Quantity of the product has to be a positive value.");
+            }
+
             var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductVariationId == productVariationId);
             int existingQuantity = existingItem?.Quantity ?? 0;
 
@@ -85,10 +90,16 @@ namespace SportEdge.API.Services.Implementation
                 throw new KeyNotFoundException($"Cart not found for user with ID {userId}");
             }
 
+          
             var productVariation = await productVariationRepository.GetAsync(productVariationId);
             if (productVariation == null)
             {
                 throw new KeyNotFoundException($"Product variation with ID {productVariationId} not found.");
+            }
+
+            if (newQuantity < 0)
+            {
+                throw new InvalidOperationException($"Quantity of the product cannot be a negative value.");
             }
 
             var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductVariationId == productVariationId);
@@ -103,13 +114,29 @@ namespace SportEdge.API.Services.Implementation
 
             }
 
-            
-            var updated = await cartRepository.UpdateCartItemQuantityAsync(cart.Id, productVariationId, newQuantity);
-            if (!updated)
+            if (newQuantity == 0)
             {
-                throw new InvalidOperationException($"Cannot update product variation item with ID {productVariationId}.");
+                var removed = await cartRepository.RemoveItemFromCartAsync(cart.Id, productVariationId);
+                if (!removed)
+                {
+                    throw new InvalidOperationException($"Cannot remove product variation item with ID {productVariationId} from cart.");
+                }
             }
-        
+            else
+            {
+                var updated = await cartRepository.UpdateCartItemQuantityAsync(cart.Id, productVariationId, newQuantity);
+                if (!updated)
+                {
+                    throw new InvalidOperationException($"Cannot update product variation item with ID {productVariationId}.");
+                }
+            }
+
+            //var updated = await cartRepository.UpdateCartItemQuantityAsync(cart.Id, productVariationId, newQuantity);
+            //if (!updated)
+            //{
+            //    throw new InvalidOperationException($"Cannot update product variation item with ID {productVariationId}.");
+            //}
+
         }
 
         /// <inheritdoc/>
