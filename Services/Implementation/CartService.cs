@@ -48,7 +48,7 @@ namespace SportEdge.API.Services.Implementation
 
             if (quantity <= 0) 
             {
-                throw new InvalidOperationException($"Quantity of the product has to be a positive value.");
+                throw new ArgumentException($"Quantity of the product has to be a positive value.");
             }
 
             var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductVariationId == productVariationId);

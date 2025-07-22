@@ -47,6 +47,10 @@ namespace SportEdge.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                return BadRequest("Exceeded_quantity: " + ex.Message);
+            }
+            catch(ArgumentException ex) 
+            {
                 return BadRequest(ex.Message);
             }
         }

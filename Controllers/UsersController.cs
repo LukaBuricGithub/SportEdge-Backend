@@ -230,6 +230,36 @@ namespace SportEdge.API.Controllers
         }
 
 
+        /// <summary>
+        /// Sends a receipt email to the user, with optional PDF receipt attachment.
+        /// </summary>
+        /// <param name="request">The request containing email details and optional PDF attachment.</param>
+        /// <returns>Ok if the email was sent; otherwise, BadRequest.</returns>
+        [AllowAnonymous]
+        [HttpPost("send-receipt")]
+        public async Task<IActionResult> SendReceiptEmail([FromBody] UserSendReceiptDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await userService.SendReceiptEmailAsync(request);
+                return Ok(new { message = "Receipt email sent successfully." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while sending the receipt email.", detail = ex.Message });
+            }
+        }
+
+
 
         /// <summary>
         /// Deletes a user by ID.

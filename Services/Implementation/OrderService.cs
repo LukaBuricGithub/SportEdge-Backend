@@ -17,25 +17,58 @@ namespace SportEdge.API.Services.Implementation
         private readonly ICartRepository cartRepository;
         private readonly IProductVariationRepository productVariationRepository;
         private readonly OrderMapping mapping;
+        private readonly CartMapping cartMapping;
 
-        public OrderService(IOrderRepository orderRepository, ICartRepository cartRepository, IProductVariationRepository productVariationRepository, OrderMapping mapping)
+        public OrderService(IOrderRepository orderRepository, ICartRepository cartRepository, IProductVariationRepository productVariationRepository, 
+            OrderMapping mapping, CartMapping cartMapping)
         {
             this.orderRepository = orderRepository;
             this.cartRepository = cartRepository;
             this.productVariationRepository = productVariationRepository;
             this.mapping = mapping;
+            this.cartMapping = cartMapping;
         }
 
 
 
         /// <inheritdoc/>
-        public async Task<OrderDto> PlaceOrderAsync(int userId,CreateOrderRequestDto request)
+        public async Task<OrderDto> PlaceOrderAsync(int userId, CreateOrderRequestDto request)
         {
             var cart = await cartRepository.GetCartByUserIdAsync(userId);
 
             if (cart == null || !cart.CartItems.Any())
             {
-                throw new InvalidOperationException("Cart is empty.");
+                throw new ArgumentException("Cart is empty.");
+            }
+
+            var cartDto = cartMapping.ToDto(cart);
+
+            var orderItems = new List<OrderItem>();
+            var variationsToUpdate = new List<ProductVariation>();
+
+            foreach (var cartItemDto in cartDto.CartItems)
+            {
+                var productVariation = await productVariationRepository.GetAsync(cartItemDto.ProductVariationId);
+
+                if (productVariation == null)
+                {
+                    throw new KeyNotFoundException($"Product variation with ID {cartItemDto.ProductVariationId} not found.");
+                }
+
+                if (productVariation.QuantityInStock < cartItemDto.Quantity)
+                {
+                    throw new InvalidOperationException($"Not enough items in stock for your order of product: {productVariation.Product.Name} (size {productVariation.SizeOption.SizeName}).");
+                }
+
+                orderItems.Add(new OrderItem
+                {
+                    ProductVariationId = cartItemDto.ProductVariationId,
+                    Quantity = cartItemDto.Quantity,
+                    UnitPrice = cartItemDto.PriceAtTime
+                });
+
+                productVariation.QuantityInStock -= cartItemDto.Quantity;
+                variationsToUpdate.Add(productVariation);
             }
 
             var order = new Order
@@ -45,44 +78,23 @@ namespace SportEdge.API.Services.Implementation
                 UserCountry = request.UserCountry,
                 UserCity = request.UserCity,
                 UserAddress = request.UserAddress,
-                OrderItems = new List<OrderItem>()
+                OrderItems = orderItems
             };
 
+            // using var transaction = await dbContext.Database.BeginTransactionAsync();
 
-            foreach (var item in cart.CartItems)
+            foreach (var variation in variationsToUpdate)
             {
-                var productVariation = await productVariationRepository.GetAsync(item.ProductVariationId);
-                
-                if (productVariation == null)
-                {
-                    throw new InvalidOperationException($"Product variation with ID {item.ProductVariationId} not found.");
-                }
-
-                if (productVariation.QuantityInStock < item.Quantity)
-                {
-                    throw new InvalidOperationException($"Not enough stock for product variation with ID {productVariation.Id}.");
-                }
-
-                productVariation.QuantityInStock -= item.Quantity;
-                await productVariationRepository.UpdateAsync(productVariation);
-
-                var orderItem = new OrderItem
-                {
-                    ProductVariationId = item.ProductVariationId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.PriceAtTime
-                    //UnitPrice = item.ProductVariation.Product.Price 
-                };
-
-                order.OrderItems.Add(orderItem);
+                await productVariationRepository.UpdateAsync(variation);
             }
 
             await orderRepository.CreateAsync(order);
             await cartRepository.ClearCartAsync(cart.Id);
             await cartRepository.DeleteAsync(cart.Id);
 
-            return mapping.ToDto(order);
+            // await transaction.CommitAsync();
 
+            return mapping.ToDto(order);
         }
 
 

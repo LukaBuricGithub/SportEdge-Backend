@@ -226,5 +226,7 @@ namespace SportEdge.API.Services.Implementation
 
             await emailSenderService.SendReceiptEmailAsync(emailTo, emailSubject, emailBody, pdfBytes, "Receipt.pdf");
         }
+
+
     }
 }

@@ -37,6 +37,11 @@ namespace SportEdge.API.Controllers
         //        return BadRequest(ex.Message);
         //    }
         //}
+        /// <summary>
+        /// Creates a new order.
+        /// </summary>
+        /// <param name="request">Request which contains extra data for creating an order (country,city,address).</param>
+        /// <returns>The information about the newly created order.</returns>
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> PlaceOrderAsync([FromBody] CreateOrderRequestDto request)
@@ -56,12 +61,23 @@ namespace SportEdge.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                return BadRequest("Exceeded_quantity: " + ex.Message);
+            }
+            catch (KeyNotFoundException ex) 
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex) 
+            {
                 return BadRequest(ex.Message);
             }
         }
 
 
-
+        /// <summary>
+        /// Retrieves all orders.
+        /// </summary>
+        /// <returns>List of all orders orders.</returns>
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
@@ -75,6 +91,11 @@ namespace SportEdge.API.Controllers
         }
 
 
+        /// <summary>
+        /// Retrieves all orders from the user.
+        /// </summary>
+        /// <param name="userId">The Id the user whose orders need to be retrieved.</param>
+        /// <returns>List of user's orders.</returns>
         [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetAllOrdersByUserId(int userId)
@@ -105,6 +126,11 @@ namespace SportEdge.API.Controllers
 
 
 
+        /// <summary>
+        /// Retrieves an order by its Id.
+        /// </summary>
+        /// <param name="id">The Id of an order to retrieve.</param>
+        /// <returns>Order information.</returns>
         [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrder(int id)
